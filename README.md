@@ -1,14 +1,17 @@
-## ItsYou.online Functional Tests
+## ItsYou.online Test-Suites
 
-This directory will contain all test suites for functionally testing ItsYou.online.
+This repo will contain all test suites for testing ItsYou.online.
 
-**Test Scenarios**
+**Functionality Testing**
 
-- [api testing](./api_testing/testscenarios/)
+- [api testing](./api_testing/)
 - [manual testing](./manual_testing/)
+- [web testing](./web_testing/)
 
-**Following directories exists:**
+**Performance Testing**
 
-- [api_testing](./api_testing) containing all automated test suites for the ItsYou.online API and JWT
-- [manual_testing](./manual_testing) containing all manual test suites for the ItsYou.online site
-- [web_testing](./web_testing) containing all automated test suites for the ItsYou.online Web portal
+- [performance testing](./performance_testing/)
+
+**Security Testing**
+
+- [security testing](./security_testing/)
