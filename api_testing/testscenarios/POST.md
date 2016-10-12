@@ -48,7 +48,7 @@
 2. validate that the user registry is added as expected
 
 
-##Test Case 6: POST user emailaddrtotpesses
+##Test Case 6: POST user totp
 
 **Purpose: Test add user totp using post /users/{username}/totp is working as expected**
 
