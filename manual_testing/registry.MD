@@ -2,6 +2,8 @@
 
 **Purpose: Access the registry using client_id and secret**
 
+**Steps:**
+
 1. add an entry in the registry depending if the client_id/secret combination is a user or an organization api key.
 - ** user ** : Add/update an entry in a user registry using client credentials
 - ** organization ** : Add/update an entry in an organization registry using client credentials
