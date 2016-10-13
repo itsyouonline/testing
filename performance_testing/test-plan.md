@@ -57,11 +57,11 @@ Right-click on Thread Group and select: Add -> Sampler -> HTTP Request.
 
 ![HTTPRequestControlPanelJMeter](HTTPRequestControlPanelJMeter.png)
 
-For example, if you enter "api" in Path field. JMeter will create the URL request https://ityou.online/api  to the server
+For example, if you enter "api" in Path field. JMeter will create the URL request https://itsyou.online/api  to the server
 
-If you keep  the Path field blank  JMeter will create the URL request https://ityou.online to the server.
+If you keep  the Path field blank  JMeter will create the URL request https://itsyou.online to the server.
 
-In this test, you keep the Path field blank to make JMeter create the URL request https://ityou.online to the server.
+In this test, you keep the Path field blank to make JMeter create the URL request https://itsyou.online to the server.
 
 **Step 3) Adding Graph result**
 
