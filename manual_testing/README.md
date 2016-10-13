@@ -10,4 +10,4 @@
 
 [restservice: 1 test case](restservice.md)
 
-[cobranding: 1 test cases](cobranding/cobranding.MD)
+[cobranding: 2 test cases](cobranding/cobranding.MD)
