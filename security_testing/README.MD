@@ -1,4 +1,4 @@
-## Use security testing tools to scan and test all ports/services/scripts:
+## Use security testing tools to scan and test all ports/services/scripts/vulnerabilities:
 
 **Scaaner Tools:**
 
@@ -11,4 +11,3 @@
 
 1. sqlmap
 2. XSSer
-3. Hydra
