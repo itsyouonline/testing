@@ -1,5 +1,7 @@
 ## Performance Test Plan with Jmeter
 
+**Example: To be used as a template**
+
 we are doing a performance analysis of itsyou.online for 1000 users
 
 **Before testing the performance of target web application, we should determine-**
