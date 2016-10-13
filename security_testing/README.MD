@@ -11,3 +11,4 @@
 
 1. sqlmap
 2. XSSer
+3. XssPy
