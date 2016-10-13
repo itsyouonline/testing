@@ -6,6 +6,8 @@
 
 [reset-passwd: 2 test cases](reset-passwd.md)
 
+[change-password: 1 test case](change-password.md)
+
 [registry: 1 test case](registry.md)
 
 [restservice: 1 test case](restservice.md)
