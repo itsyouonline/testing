@@ -97,4 +97,4 @@ The Throughput is the most important parameter. It represents the ability of the
 The deviation is shown in red - it indicates the deviation from the average. The smaller the better.
 
 **Here is the practical example**
-![itsyouonline.jmx](itsyouonline.jmx)
+[itsyouonline.jmx](itsyouonline.jmx)
