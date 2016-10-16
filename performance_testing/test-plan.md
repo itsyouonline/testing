@@ -95,3 +95,6 @@ At the bottom of the picture, there are the following statistics, represented in
 The Throughput is the most important parameter. It represents the ability of the server to handle heavy load.  The higher the Throughput is, the better is the server performance.
 
 The deviation is shown in red - it indicates the deviation from the average. The smaller the better.
+
+**Here is the practical example**
+![itsyouonline.jmx](itsyouonline.jmx)
