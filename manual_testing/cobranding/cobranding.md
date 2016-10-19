@@ -10,7 +10,19 @@
 4. invite someone to this organization, should succeed
 5. create sub-organization, should succeed
 
-##Test Case 2: Organization cobranding 
+##Test Case 2: Set organization api key
+
+**Purpose: Test organization api key generation is working as expected**
+
+**Steps:**
+
+1. click on organization.
+2. press setting and add organization domain name, should succeed
+3. press add api access key, enter lable and callbackurl and verify the format, should succeed
+4. check api key is generated, should succeed
+
+
+##Test Case 3: Organization cobranding 
 
 **Purpose: Test cobranding is working as expected**
 
@@ -32,7 +44,8 @@ When a user is asked to login, this logo is added to the login/register page:
 
 ![Branded login page](BrandedLoginPage.png)
 
-##Test Case 3: URL redirection integration with another website
+
+##Test Case 4: URL redirection integration with another website
 
 **Purpose: Test URL redirection integration with another website is working as expected**
 
