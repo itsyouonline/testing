@@ -1,8 +1,10 @@
 ##Manual Test suite:
 
+[sign-up: 2 test cases](sign-up.md)
+
 [sign-in: 2 test cases](sign-in.md)
 
-[sign-up: 2 test cases](sign-up.md)
+[managing personal information: 10 test cases](personal_info.md)
 
 [reset-passwd: 2 test cases](reset-passwd.md)
 
