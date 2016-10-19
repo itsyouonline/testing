@@ -14,4 +14,4 @@
 
 [restservice: 1 test case](restservice.md)
 
-[organizations and cobranding: 3 test cases](cobranding/cobranding.md)
+[organizations and cobranding: 4 test cases](cobranding/cobranding.md)
