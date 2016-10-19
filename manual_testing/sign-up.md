@@ -14,3 +14,6 @@
 **Steps:**
 
 1. Register with valid authenticator application, should succeed
+
+
+[![see registration chart](registration.svg)]
