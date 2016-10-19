@@ -14,3 +14,5 @@
 **Steps:**
 
 1. Sign-in with valid authenticator application, should succeed
+
+[![see login chart](login.svg)]
