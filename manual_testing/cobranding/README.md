@@ -1,4 +1,4 @@
 ##Cobranding tests contains:
 
-[portal: 2 test cases](cobranding.md)
+[portal: 3 test cases](cobranding.md)
 
