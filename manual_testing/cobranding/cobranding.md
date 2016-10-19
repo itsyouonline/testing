@@ -1,5 +1,17 @@
 ##Test Case 1: Adding new organization
 
+**Purpose: Test adding new organization is working as expected**
+
+**Steps:**
+
+1. select organization from the top menu
+2. click new organization and enter new organization name, verify its mandatory, should succeed
+3. check that you will be under people section as owner, should succeed
+4. invite someone to this organization, should succeed
+5. create sub-organization, should succeed
+
+##Test Case 2: Organization cobranding 
+
 **Purpose: Test cobranding is working as expected**
 
 **Steps:**
@@ -20,7 +32,7 @@ When a user is asked to login, this logo is added to the login/register page:
 
 ![Branded login page](BrandedLoginPage.png)
 
-##Test Case 2: URL redirection integration with another website
+##Test Case 3: URL redirection integration with another website
 
 **Purpose: Test URL redirection integration with another website is working as expected**
 
