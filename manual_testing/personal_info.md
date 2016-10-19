@@ -1,3 +1,41 @@
+##Test Case 1: Profile full name
+
+**Purpose: Test profile full name is working as expected**
+
+**Steps:**
+
+1. add full name and validate first name and last name are mandatory, should succeed
+2. edit full name and validate first name and last name are mandatory, should succeed
+
+
+##Test Case 2: Profile email addresses
+
+**Purpose: Test profile email address is working as expected**
+
+**Steps:**
+
+1. add email address and validate label and email are mandatory, should succeed
+2. edit email address and validate label and email are mandatory, should succeed
+
+
+##Test Case 3: Profile phone numbers
+
+**Purpose: Test profile phone number is working as expected**
+
+**Steps:**
+
+1. add phone number and validate label and phone number are mandatory, should succeed
+2. edit phone number and validate label and phone number are mandatory, should succeed
+3. remove phone number, should succeed
+
+
+##Test Case 4: Profile facebook
+
+**Purpose: Test profile facebook is working as expected**
+
+**Steps:**
+
+1. add facebook using valid account, should succeed
 2. remove facebook, should succeed
 
 
