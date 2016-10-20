@@ -35,3 +35,6 @@
 
 ** Download this example from here:
 [itsyouonline.jmx](itsyouonline.jmx)
+
+** Performance results for 100 thread:
+[100 thread](test_results/100_threads/README.md)
