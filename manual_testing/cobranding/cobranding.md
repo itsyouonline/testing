@@ -54,4 +54,15 @@ When a user is asked to login, this logo is added to the login/register page:
 1. go to website integrated with itsyouonline
 2. click the link to sign-in using itsyou.online
 3. login using your itsyou.online account and validate that successfully redirect you to the website page with your login information
-4. check that you got the required info from your itsyou.online account
+
+
+##Test Case 5: Sharing of your personal information
+
+**Purpose: Test sharing of your personal information with another website is working as expected**
+
+**Steps:**
+
+1. go to website integrated with itsyouonline
+2. click the link to sign-in using itsyou.online
+3. login using your itsyou.online account and validate that successfully redirect you to the website page with your login information
+4. check that you got the required personal information from your itsyou.online account
