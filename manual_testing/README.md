@@ -16,4 +16,4 @@
 
 [URLs Verifications: 3 test cases](urls_verifications.md)
 
-[organizations and cobranding: 4 test cases](cobranding/cobranding.md)
+[organizations and cobranding: 5 test cases](cobranding/cobranding.md)
