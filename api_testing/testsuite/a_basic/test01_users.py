@@ -1,4 +1,4 @@
-from functional_testing.Itsyouonline.api_testing.utils import BaseTest
+from testing.api_testing.utils import BaseTest
 import types
 import unittest
 
@@ -189,7 +189,7 @@ class UsersTestsB(BaseTest):
         self.lg('%s ENDED' % self._testID)
 
     #Currently fail due to issue https://github.com/itsyouonline/identityserver/issues/218
-    @unittest.skip("fail due to issue https://github.com/itsyouonline/identityserver/issues/218")
+    #@unittest.skip("fail due to issue https://github.com/itsyouonline/identityserver/issues/218")
     def test010_get_user_info(self):
         """ ITSYOU-010
         *Test case for check get user info /users/{username}/info.*
@@ -241,7 +241,7 @@ class UsersTestsB(BaseTest):
         self.lg('%s ENDED' % self._testID)
 
     #Currently fail due to issue https://github.com/itsyouonline/identityserver/issues/218
-    @unittest.skip("fail due to issue https://github.com/itsyouonline/identityserver/issues/218")
+    #@unittest.skip("fail due to issue https://github.com/itsyouonline/identityserver/issues/218")
     def test012_get_user_authorizations(self):
         """ ITSYOU-012
         *Test case for check get user authorizations /users/{username}/authorizations.*
