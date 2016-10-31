@@ -43,7 +43,7 @@ class Client:
         uri = uri + build_query_string(query_params)
         return self.session.post(uri, data, headers=headers)
 
-    def users_byUsernameorganizations_byGlobalidrolesrole_delete(self, globalid, role, username, headers=None, query_params=None):
+    def RejectMembership(self, globalid, role, username, headers=None, query_params=None):
         """
         Reject membership invitation in an organization.
         It is method for DELETE /users/{username}/organizations/{globalid}/roles/{role}
@@ -51,6 +51,17 @@ class Client:
         uri = self.url + "/users/"+username+"/organizations/"+globalid+"/roles/"+role
         uri = uri + build_query_string(query_params)
         return self.session.delete(uri, headers=headers)
+
+    def LeaveOrganization(self, globalid, username, headers=None, query_params=None):
+        """
+        Removes the user from an organization.
+        It is method for DELETE /users/{username}/organizations/{globalid}/leave
+        """
+
+        uri = self.url + "/users/" + username + "/organizations/" + globalid + "leave"
+        uri = uri + build_query_string(query_params)
+        return self.session.delete(uri, headers=headers)
+
 
     def GetUser(self, username, headers=None, query_params=None):
         """
@@ -279,7 +290,7 @@ class Client:
         uri = uri + build_query_string(query_params)
         return self.session.put(uri, data, headers=headers)
 
-    def users_byUsernamebankslabel_delete(self, username, label, headers=None, query_params=None):
+    def DeleteUserBankAccount(self, username, label, headers=None, query_params=None):
         """
         Delete a BankAccount
         It is method for DELETE /users/{username}/banks/{label}
