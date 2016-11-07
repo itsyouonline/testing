@@ -1,13 +1,16 @@
 **Jmeter provides a nice report that can be generated to view performance metrics explained [here](Performance_Objectives.md)**
-## To be able to generate jmeter report-generator :
 
-Template example to be used: Itsyouonline2.jmx
+**In this example, a simple data writer listner will be added to [that example](typical_example.md) in order to generate a csv file that will be used to generate the jmeter report**
+
+**please view the used template [here](itsyouonline2.jmx)**
+
+## To be able to generate jmeter report-generator :
 
 1- Make sure that you have the latest jmeter binaries from here: http://jmeter.apache.org/download_jmeter.cgi
    (For Now the latest update used is apache-jmeter-3.0.tgz)
 
 
-2- Copy then paste the following configurations in the user.properties  found in  apache-jmeter-3.0/bin/
+2- Copy and paste the following configurations in the user.properties  found in  apache-jmeter-3.0/bin/
 
 ```
 #########################
@@ -122,13 +125,13 @@ jmeter.save.saveservice.timestamp_format = ms
 ```
 
 
-3- Use the simple data writer listner offered by the jmeter to extract results on csv file. (ex: testing.csv)
+3- Use the simple data writer listner offered by the jmeter to extract results to csv file. (ex: testing.csv)
 
   ![JMeter1](simple_data_writer_listner.png)
 
 
-4- From inside bin directory: ../apache-jmeter-3.0/bin$ ./jmeter -g {location}/testing.csv -o {results_directory}
-   Note: the results_directory should always be empty 
+4- Then from inside the bin directory: ../apache-jmeter-3.0/bin$ ./jmeter -g {location}/testing.csv -o {results_directory}
+   - Note: the results_directory should always be empty 
 
 
 5- To view the jmeter report generator, open index.html in the results directory
@@ -136,7 +139,6 @@ jmeter.save.saveservice.timestamp_format = ms
    ![JMeter2](jmeter_report_generator1.png)
 
 
-In case you want to view some of these graphs in the jmeter itself without generating the jmeter report 
-install the plugin you want to use from here: https://jmeter-plugins.org/wiki/Start/
+**Note: In case you want to view some of these graphs in the jmeter itself without generating the jmeter report 
+install the plugin you want to use from here: https://jmeter-plugins.org/wiki/Start/**
 
-Template example to be used: Itsyouonline2(copy).jmx
