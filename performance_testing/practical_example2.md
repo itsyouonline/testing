@@ -1,17 +1,18 @@
-** To be able to generate jmeter report-generator to view the explained metrics [here](Performance_Objectives.md):
+**Jmeter provides a nice report that can be generated to view performance metrics explained [here](Performance_Objectives.md)**
+## To be able to generate jmeter report-generator :
 
 Template example to be used: Itsyouonline2.jmx
 
-1- Download latest jmeter binaries from here: http://jmeter.apache.org/download_jmeter.cgi
+1- Make sure that you have the latest jmeter binaries from here: http://jmeter.apache.org/download_jmeter.cgi
    (For Now the latest update used is apache-jmeter-3.0.tgz)
 
 
 2- Copy then paste the following configurations in the user.properties  found in  apache-jmeter-3.0/bin/
 
 ```
-#---------------------------------------------------------------------------
+#########################
 # Reporting configuration
-#---------------------------------------------------------------------------
+#########################
 
 # Sets the satisfaction threshold for the APDEX calculation (in milliseconds).
 #jmeter.reportgenerator.apdex_satisfied_threshold=500
@@ -120,16 +121,22 @@ jmeter.save.saveservice.time = true
 jmeter.save.saveservice.timestamp_format = ms
 ```
 
+
 3- Use the simple data writer listner offered by the jmeter to extract results on csv file. (ex: testing.csv)
-   --screen shot
+
+  ![JMeter1](simple_data_writer_listner.png)
+
 
 4- From inside bin directory: ../apache-jmeter-3.0/bin$ ./jmeter -g {location}/testing.csv -o {results_directory}
    Note: the results_directory should always be empty 
 
+
 5- To view the jmeter report generator, open index.html in the results directory
-   2 screen shots 
+   ![JMeter1](jmeter_results.png)
+   ![JMeter2](jmeter_report_generator1.png)
 
 
-In case u want to view some graphs in the jmeter it self without generating the jmeter report 
-install the plugin u want to use from here: https://jmeter-plugins.org/wiki/Start/
+In case you want to view some of these graphs in the jmeter itself without generating the jmeter report 
+install the plugin you want to use from here: https://jmeter-plugins.org/wiki/Start/
+
 Template example to be used: Itsyouonline2(copy).jmx
