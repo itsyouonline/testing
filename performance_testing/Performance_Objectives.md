@@ -34,4 +34,4 @@
 
 8- Transactions per second: This graph shows the number of transactions per second for each sampler. 
 It counts for each seconds the number of finished transactions. it will also display the failed transactions.
-   - Transaction is just an atomic unit of work. It's the smallest change to a system that a external observer can perceive. For example, if you put an insert and an update in a single database transaction, the database guarantees that no query on the database would "see" the inbetween state.
+   - Transaction is just an atomic unit of work. It's the smallest change to a system that a external observer can perceive. For example, if you put an insert and an update in a single database transaction, the database guarantees that no query on the database would "see" the in between state.
