@@ -97,4 +97,7 @@ The Throughput is the most important parameter. It represents the ability of the
 The deviation is shown in red - it indicates the deviation from the average. The smaller the better.
 
 **Here is the practical example**
-[practical example](typical_example.md)
+[Practical Example 1](typical_example.md)
+**For further detailed performance objectives and results**
+[Performance Objectives](Performance_Objectives.md)
+[Practical Example 2]()
