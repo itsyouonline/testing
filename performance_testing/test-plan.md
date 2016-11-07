@@ -98,6 +98,7 @@ The deviation is shown in red - it indicates the deviation from the average. The
 
 **Here is the practical example**
 [Practical Example 1](typical_example.md)
+
 **For further detailed performance objectives and results**
 [Performance Objectives](Performance_Objectives.md)
 [Practical Example 2]()
