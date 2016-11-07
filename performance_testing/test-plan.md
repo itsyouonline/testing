@@ -101,4 +101,4 @@ The deviation is shown in red - it indicates the deviation from the average. The
 
 **For further detailed performance objectives and results**
 [Performance Objectives](Performance_Objectives.md)
-[Practical Example 2]()
+[Practical Example 2](practical_example2.md)
