@@ -1,4 +1,4 @@
-from testing.api_testing.utils import BaseTest
+from api_testing.utils import BaseTest
 import types
 import unittest
 
@@ -7,11 +7,11 @@ class UsersTestsA(BaseTest):
 
     def setUp(self):
         super(UsersTestsA, self).setUp()
-        self.response = self.client.api.GetUser(self.user)
-        self.lg('GetUser [%s] response [%s]' % (self.user, self.response.json()))
+        self.response = self.client_1.api.GetUser(self.user_1)
+        self.lg('GetUser [%s] response [%s]' % (self.user_1, self.response.json()))
 
 
-    #Currently fail due to issue https://github.com/itsyouonline/identityserver/issues/218
+    @unittest.skip("bug: #467")
     def test001_get_user(self):
         """ ITSYOU-001
         *Test case for check get user /users/{username}.*
@@ -61,8 +61,8 @@ class UsersTestsA(BaseTest):
         #. validate all expected user addressess in the returned response
         """
         self.lg('%s STARTED' % self._testID)
-        response = self.client.api.GetUserAddresses(self.user)
-        self.lg('GetUserAddresses [%s] response [%s]' % (self.user, response.json()))
+        response = self.client_1.api.GetUserAddresses(self.user_1)
+        self.lg('GetUserAddresses [%s] response [%s]' % (self.user_1, response.json()))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(type(response.json()), types.ListType)
         self.assertEqual(response.json(), self.response.json()['addresses'])
@@ -78,8 +78,8 @@ class UsersTestsA(BaseTest):
         #. validate all expected email addressess in the returned response
         """
         self.lg('%s STARTED' % self._testID)
-        response = self.client.api.GetEmailAddresses(self.user)
-        self.lg('GetEmailAddresses [%s] response [%s]' % (self.user, response.json()))
+        response = self.client_1.api.GetEmailAddresses(self.user_1)
+        self.lg('GetEmailAddresses [%s] response [%s]' % (self.user_1, response.json()))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(type(response.json()), types.ListType)
         self.assertEqual(response.json(), self.response.json()['emailaddresses'])
@@ -95,8 +95,8 @@ class UsersTestsA(BaseTest):
         #. validate all expected bankaccounts in the returned response
         """
         self.lg('%s STARTED' % self._testID)
-        response = self.client.api.GetUserBankAccounts(self.user)
-        self.lg('GetUserBankAccounts [%s] response [%s]' % (self.user, response.json()))
+        response = self.client_1.api.GetUserBankAccounts(self.user_1)
+        self.lg('GetUserBankAccounts [%s] response [%s]' % (self.user_1, response.json()))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(type(response.json()), types.ListType)
         self.assertEqual(response.json(), self.response.json()['bankaccounts'])
@@ -112,8 +112,8 @@ class UsersTestsA(BaseTest):
         #. validate all expected bankaccounts in the returned response
         """
         self.lg('%s STARTED' % self._testID)
-        response = self.client.api.GetUserBankAccounts(self.user)
-        self.lg('GetUserBankAccounts [%s] response [%s]' % (self.user, response.json()))
+        response = self.client_1.api.GetUserBankAccounts(self.user_1)
+        self.lg('GetUserBankAccounts [%s] response [%s]' % (self.user_1, response.json()))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(type(response.json()), types.ListType)
         self.assertEqual(response.json(), self.response.json()['bankaccounts'])
@@ -133,11 +133,11 @@ class UsersTestsB(BaseTest):
         #. validate all expected username in the returned response
         """
         self.lg('%s STARTED' % self._testID)
-        response = self.client.api.GetUser(self.user)
-        self.lg('GetUser [%s] response [%s]' % (self.user, response.json()))
+        response = self.client_1.api.GetUser(self.user_1)
+        self.lg('GetUser [%s] response [%s]' % (self.user_1, response.json()))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(type(response.json()['username']), type(u''))
-        self.assertEqual(response.json()['username'], self.user)
+        self.assertEqual(response.json()['username'], self.user_1)
         self.lg('%s ENDED' % self._testID)
 
     def test007_get_user_notifications(self):
@@ -150,8 +150,8 @@ class UsersTestsB(BaseTest):
         #. validate all expected notifications in the returned response
         """
         self.lg('%s STARTED' % self._testID)
-        response = self.client.api.GetNotifications(self.user)
-        self.lg('GetNotifications [%s] response [%s]' % (self.user, response.json()))
+        response = self.client_1.api.GetNotifications(self.user_1)
+        self.lg('GetNotifications [%s] response [%s]' % (self.user_1, response.json()))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(type(response.json()), types.DictType)
         self.lg('%s ENDED' % self._testID)
@@ -166,8 +166,8 @@ class UsersTestsB(BaseTest):
         #. validate all expected organizations in the returned response
         """
         self.lg('%s STARTED' % self._testID)
-        response = self.client.api.GetUserOrganizations(self.user)
-        self.lg('GetUserOrganizations [%s] response [%s]' % (self.user, response.json()))
+        response = self.client_1.api.GetUserOrganizations(self.user_1)
+        self.lg('GetUserOrganizations [%s] response [%s]' % (self.user_1, response.json()))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(type(response.json()), types.DictType)
         self.lg('%s ENDED' % self._testID)
@@ -182,14 +182,12 @@ class UsersTestsB(BaseTest):
         #. validate all expected apikeys in the returned response
         """
         self.lg('%s STARTED' % self._testID)
-        response = self.client.api.ListAPIKeys(self.user)
-        self.lg('ListAPIKeys [%s] response [%s]' % (self.user, response.json()))
+        response = self.client_1.api.ListAPIKeys(self.user_1)
+        self.lg('ListAPIKeys [%s] response [%s]' % (self.user_1, response.json()))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(type(response.json()), types.ListType)
         self.lg('%s ENDED' % self._testID)
 
-    #Currently fail due to issue https://github.com/itsyouonline/identityserver/issues/218
-    #@unittest.skip("fail due to issue https://github.com/itsyouonline/identityserver/issues/218")
     def test010_get_user_info(self):
         """ ITSYOU-010
         *Test case for check get user info /users/{username}/info.*
@@ -200,8 +198,8 @@ class UsersTestsB(BaseTest):
         #. validate all expected apikeys in the returned response
         """
         self.lg('%s STARTED' % self._testID)
-        response = self.client.api.GetUserInformation(self.user)
-        self.lg('GetUserInformation [%s] response [%s]' % (self.user, response.json()))
+        response = self.client_1.api.GetUserInformation(self.user_1)
+        self.lg('GetUserInformation [%s] response [%s]' % (self.user_1, response.json()))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(type(response.json()), types.DictType)
         self.assertIn('username', response.json().keys())
@@ -234,14 +232,12 @@ class UsersTestsB(BaseTest):
         #. validate all expected contracts in the returned response
         """
         self.lg('%s STARTED' % self._testID)
-        response = self.client.api.GetUserContracts(self.user)
-        self.lg('GetUserContracts [%s] response [%s]' % (self.user, response.json()))
+        response = self.client_1.api.GetUserContracts(self.user_1)
+        self.lg('GetUserContracts [%s] response [%s]' % (self.user_1, response.json()))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(type(response.json()), types.ListType)
         self.lg('%s ENDED' % self._testID)
 
-    #Currently fail due to issue https://github.com/itsyouonline/identityserver/issues/218
-    #@unittest.skip("fail due to issue https://github.com/itsyouonline/identityserver/issues/218")
     def test012_get_user_authorizations(self):
         """ ITSYOU-012
         *Test case for check get user authorizations /users/{username}/authorizations.*
@@ -252,8 +248,8 @@ class UsersTestsB(BaseTest):
         #. validate all expected authorizations in the returned response
         """
         self.lg('%s STARTED' % self._testID)
-        response = self.client.api.GetAllAuthorizations(self.user)
-        self.lg('GetAllAuthorizations [%s] response [%s]' % (self.user, response.json()))
+        response = self.client_1.api.GetAllAuthorizations(self.user_1)
+        self.lg('GetAllAuthorizations [%s] response [%s]' % (self.user_1, response.json()))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(type(response.json()), types.ListType)
         self.lg('%s ENDED' % self._testID)
