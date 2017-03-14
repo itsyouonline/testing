@@ -1,44 +1,62 @@
-from testing.api_testing.utils import BaseTest
+from api_testing.utils import BaseTest
 import types
-import datetime
-import uuid
+import unittest
+from random import randint
+import json
+import time
 
 
-class ContractsTests(BaseTest):
+class ContractsTestsB(BaseTest):
 
     def setUp(self):
-        super(ContractsTests, self).setUp()
-        response = self.client.api.GetUserOrganizations(self.user)
-        self.lg('GetUserOrganizations [%s] response [%s]' % (self.user, response.json()))
-        self.assertEqual(response.status_code, 200)
-        organization_id = response.json()['owner'][0]
-        response = self.client.api.GetOrganizationContracts(organization_id)
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(type(response.json()), types.ListType)
-        self.contractId = response.json()[0]
-        self.lg('contractId %s' % self.contractId)
+        super(ContractsTestsB, self).setUp()
 
-    #Currently fail due to issue https://github.com/itsyouonline/identityserver/issues/233
-    def test001_post_contract_signatures(self):
-        """ ITSYOU-032
-        *Test case for check add a contract signature POST /contracts/{contractId}/signatures.*
+    def tearDown(self):
+        super(ContractsTestsB, self).tearDown()
 
-        **Test Scenario:**
-
-        #. check get a contract, should succeed
-        #. validate all expected keys in the returned response
-        #. post new signature, should succeed
+    @unittest.skip('bug: #469')
+    def test000_get_post_contract(self):
         """
-        self.lg('%s STARTED' % self._testID)
-        date_time = datetime.datetime.now()
-        public_key = self.applicationid
-        signature = str(uuid.uuid4()).replace('-', '')[0:10]
-        signed_by = str(uuid.uuid4()).replace('-', '')[0:10]
-        data = {u'date': date_time, u'publicKey': public_key, u'signature': signature,
-                u'signedBy': signed_by}
-        response = self.client.api.SignContract(data=data, contractId=self.contractId)
+            ##ITSYOU-059
+            - Create a new contract, should succeed with 201
+            - Get contract by contractid, should succeed with 200
+            - Get invalid contract, should fail with 404
+            - Add signature, should succeed with 201
+            - Add signature with invalid inputs, should fail with 400
+        """
+
+        self.lg('Create a new contract, should succeed with 201')
+        contractid = self.random_value()
+        expire = '2030-10-02T22:00:00Z'
+        data = {'content':'contract_1', 'contractId':contractid, 'contractType':'partnership','expires':expire}
+        response = self.client_1.api.CreateUserContract(data, self.user_1)
         self.assertEqual(response.status_code, 201)
-        response = self.client.api.GetContract(self.contractId)
+
+        self.lg('Get contract by contractid, should succeed with 200')
+        response = self.client_1.api.GetContract(contractid)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(type(response.json()), types.DictType)
-        self.lg('%s ENDED' % self._testID)
+        self.assertEqual(contractid, response.json()['contractId'])
+
+        #bug #469
+        self.lg('Get invalid contract, should fail with 404')
+        response = self.client_1.api.GetContract('fake_contract_654564')
+        self.assertEqual(response.status_code, 404)
+
+        self.lg('Add signature, should succeed with 201')
+        signature = self.random_value()
+        signedby = self.random_value()
+        date = self.time_rfc3339_format()
+        invalid_date = self.random_value()
+        publicKey = self.random_value()
+
+        data = {"date":date,"publicKey":publicKey,"signature":signature,"signedBy":signedby}
+        response = self.client_1.api.SignContract(data, contractid)
+        self.assertEqual(response.status_code, 201)
+        response = self.client_1.api.GetContract(contractid)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data, response.json()['signatures'][-1])
+
+        self.lg('Add signature with invalid inputs, should fail with 400')
+        data = {"date":invalid_date,"publicKey":publicKey,"signature":signature,"signedBy":signedby}
+        response = self.client_1.api.SignContract(data, contractid)
+        self.assertEqual(response.status_code, 400)
