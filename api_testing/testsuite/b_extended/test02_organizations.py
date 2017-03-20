@@ -134,7 +134,6 @@ class OrganizationsTestsB(BaseTest):
 
     @unittest.skip('bug: #447 #448 #450')
     def test002_get_post_put_delete_organization(self):
-
         """
             #ITSYOU-041
             - Create suborganization (1), should succeed with 201
@@ -190,7 +189,6 @@ class OrganizationsTestsB(BaseTest):
 
     @unittest.skip('#453')
     def test003_get_post_put_delete_apikey(self):
-
         """
             #ITSYOU-042
             - Register a new apikey (1), should succeed with 201
@@ -477,10 +475,224 @@ class OrganizationsTestsB(BaseTest):
 
         self.lg('%s ENDED' % self._testID)
 
-    def test006_get_delete_users_invitation(self):
-
+    @unittest.skip('bug: #440 #452')
+    def test006_get_post_twofa(self):
         """
             #ITSYOU-045
+            - Update 2fa with owner user, should succeed with 200
+            - Update 2fa with invalid value, should fail with 400
+            - Update 2fa with member user, should fail with 403
+            - Get 2fa, should succeed with 200
+            - Get 2fa of nonexisting organization , should fail with 404
+            - Update 2fa of nonexisting organization, should fail with 404
+        """
+        self.lg('%s STARTED' % self._testID)
+
+        globalid = self.org_12_globalid
+
+        self.lg('[POST] Update 2fa with owner user, should succeed with 200')
+        secondsvalidity = 2000
+        data = {"secondsvalidity":secondsvalidity}
+        response = self.client_1.api.UpdateTwoFA(data, globalid)
+        self.assertEqual(response.status_code, 200)
+
+        self.lg('[POST] Update 2fa with invalid value, should fail with 400')
+        secondsvalidity = self.random_value()
+        data = {"secondsvalidity":secondsvalidity}
+        response = self.client_1.api.UpdateTwoFA(data, globalid)
+        self.assertEqual(response.status_code, 400)
+
+        self.lg('[POST] Update 2fa with member user, should fail with 403')
+        secondsvalidity = 2000
+        data = {"secondsvalidity":secondsvalidity}
+        response = self.client_2.api.UpdateTwoFA(data, globalid)
+        self.assertEqual(response.status_code, 403)
+
+        self.lg('[GET] Get 2fa, should succeed with 200')
+        response = response = self.client_1.api.GetTwoFA(globalid)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['secondsvalidity'], secondsvalidity)
+
+        #bug #440 (internal server error)
+        self.lg('[GET] Get 2fa of nonexisting organization , should fail with 404')
+        response = self.client_1.api.GetTwoFA('fake_globalid')
+        self.assertEqual(response.status_code, 404)
+
+        ##bug #452 (403 instead of 404 put not post)
+        self.lg('[POST] Update 2fa of nonexisting organization, should fail with 404')
+        data = {"secondsvalidity":secondsvalidity}
+        response = self.client_2.api.UpdateTwoFA(data, 'fake_globalid')
+        self.assertEqual(response.status_code, 404)
+
+        self.lg('%s ENDED' % self._testID)
+
+    @unittest.skip('bug: #439')
+    def test007_get_put_delete_logo(self):
+            """
+                #ITSYOU-046
+                - Get organization logo, should succeed with 200
+                - Update organization logo, should succeed with 200
+                - Update organization logo with large file, should fail with 413
+                - Remove organization logo, should succeed with 204
+                - Remove nonexisting organization logo, should fail with 404
+            """
+            self.lg('%s STARTED' % self._testID)
+
+            globalid = self.org_11_globalid
+
+            self.lg('[GET] Get organization logo, should succeed with 200')
+            response = self.client_1.api.GetOrganizationLogo(globalid)
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(response.json()['logo'], "")
+
+            self.lg('[PUT] Update organization logo, should succeed with 200')
+            logo = 'data:image/png;base64,' + self.random_value(1024)
+            data = {"logo":logo}
+            response = self.client_1.api.ganizationLogo(data, globalid)
+            self.assertEqual(response.status_code, 200)
+
+            response = self.client_1.api.GetOrganizationLogo(globalid)
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(response.json()['logo'], logo)
+
+            self.lg('[PUT] Update organization logo with large file, should fail with 413')
+            large_logo = 'data:image/png;base64,' + self.random_value(1024*1024*6)
+            data = {"logo":large_logo}
+            response = self.client_1.api.SetOrganizationLogo(data, globalid)
+            self.assertEqual(response.status_code, 413)
+
+            self.lg('[DEL] Remove organization logo, should succeed with 204')
+            response = self.client_1.api.DeleteOrganizationLogo(globalid)
+            self.assertEqual(response.status_code, 204)
+
+            #bug #439 (403 instead of 404)
+            self.lg('[DEL] Remove nonexisting organization logo, should fail with 404')
+            response = self.client_1.api.DeleteOrganizationLogo('fake_globalid')
+            self.assertEqual(response.status_code, 404)
+
+            self.lg('%s ENDED' % self._testID)
+
+    @unittest.skip('bug: #445')
+    def test008_get_post_contracts(self):
+            """
+                #ITSYOU-047
+                - Create a new contract (1), should succeed with 201
+                - Create a new contract (2), should succeed with 201
+                - Create a new expired contract (3), should succeed with 201
+                - Get organization\'s contracts, should succeed with 200
+                - Get organization\'s contracts & include the expired contracts, should succeed with 200
+                - Get organization\'s contracts with page size 1, should succeed with 200
+                - Get organization\'s contracts with start page 2, should succeed with 200
+            """
+            self.lg('%s STARTED' % self._testID)
+
+            globalid = self.org_11_globalid
+
+            self.lg('Create a new contract (1), should succeed with 201')
+            contractid_1 = self.random_value()
+            expire = '2030-10-02T22:00:00Z'
+            data = {'content':'contract_1', 'contractId':contractid_1, 'contractType':'partnership','expires':expire}
+            response = self.client_1.api.CreateOrganizationContracts(data, globalid)
+            self.assertEqual(response.status_code, 201)
+
+            self.lg('Create a new contract (2), should succeed with 201')
+            contractid_2 = self.random_value()
+            expire = '2030-10-02T22:00:00Z'
+            data = {'content':'contract_2', 'contractId':contractid_2, 'contractType':'partnership','expires':expire}
+            response = self.client_1.api.CreateOrganizationContracts(data, globalid)
+            self.assertEqual(response.status_code, 201)
+
+            self.lg('Create a new expired contract (3), should succeed with 201')
+            contractid_3 = self.random_value()
+            expire = '2010-10-02T22:00:00Z'
+            data = {'content':'contract_3', 'contractId':contractid_3, 'contractType':'partnership','expires':expire}
+            response = self.client_1.api.CreateOrganizationContracts(data, globalid)
+            self.assertEqual(response.status_code, 201)
+
+            self.lg('[GET] Get organization\'s contracts, should succeed with 200')
+            response = self.client_1.api.GetOrganizationContracts(globalid)
+            self.assertEqual(response.status_code, 200)
+            self.assertNotEqual(contractid_3, response.json()[-1]['contractId'])
+            self.assertEqual(contractid_1, response.json()[-2]['contractId'])
+            self.assertEqual(contractid_2, response.json()[-1]['contractId'])
+
+            response = self.client_1.api.GetOrganizationContracts(globalid, query_params={"max":1000,"includeExpired":True})
+            self.assertEqual(response.status_code, 200)
+            number_of_contracts = len(response.json())-1
+
+            self.lg('[GET] Get organization\'s contracts & include the expired contracts, should succeed with 200')
+            response = self.client_1.api.GetOrganizationContracts(globalid, query_params={"max":1000,"includeExpired":True})
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(contractid_3, response.json()[-1]['contractId'])
+
+            self.lg('[GET] Get organization\'s contracts with page size 1, should succeed with 200')
+            response = self.client_1.api.GetOrganizationContracts(globalid, query_params={"max":1, "start":number_of_contracts})
+            self.assertEqual(contractid_2, response.json()[0]['contractId'])
+            self.assertEqual(response.status_code, 200)
+
+            self.lg('[GET] Get organization\'s contracts with page size 2, should succeed with 200')
+            response = self.client_1.api.GetOrganizationContracts(globalid, query_params={"max":1, "start":number_of_contracts-1})
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(contractid_1, response.json()[0]['contractId'])
+
+            self.lg('%s ENDED' % self._testID)
+
+    def test009_get_post_put_delete_description(self):
+        """
+            #ITSYOU-048
+            - Add new description with langkey "en", should succeed with 201
+            - Get description by langkey, should succeed with 200
+            - Add new description with random langkey, should succeed with 201
+            - Update description, should succeed with 200
+            - Delete description, should succeed with 204
+            - Get description withfallback, should succeed with 200
+        """
+        self.lg('%s STARTED' % self._testID)
+
+        globalid = self.org_11_globalid
+
+        self.lg('Add new description with langkey "en", should succeed with 201')
+        text = self.random_value()
+        langkey = 'en'
+        data = {"langkey": langkey, "text": text}
+        response = self.client_1.api.AddOrganizationDescription(data, globalid)
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.json(), data)
+
+        self.lg('Get description by langkey, should succeed with 200')
+        response = self.client_1.api.GetOrganizationDescription(langkey, globalid)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['langkey'], langkey)
+
+        self.lg('Add new description with random langkey, should succeed with 201')
+        text = self.random_value()
+        new_langkey = self.random_value(2)
+        new_data = {"langkey": new_langkey, "text": text}
+        response = self.client_1.api.AddOrganizationDescription(new_data, globalid)
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.json(), new_data)
+
+        self.lg('Update description, should succeed with 200')
+        text = self.random_value()
+        new_data = {"langkey": new_langkey, "text": text}
+        response = self.client_1.api.UpdateOrganizationDescription(new_data, globalid)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), new_data)
+
+        self.lg('Delete description, should succeed with 204')
+        response = self.client_1.api.DeleteOrganizationDescription(new_langkey, globalid)
+        self.assertEqual(response.status_code, 204)
+
+        self.lg('Get description withfallback, should succeed with 200')
+        response = self.client_1.api.GetOrganizationDescriptionWithfallback(new_langkey, globalid)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['langkey'], 'en')
+
+        self.lg('%s ENDED' % self._testID)
+
+    def test010_get_delete_users_invitation(self):
+        """
+            #ITSYOU-049
             * Same steps for member and owner roles
             - User_1 invite nonexisting user to join org_11, should fail with 404
             - User_1 invite user_2 to join org_11, should succeed with 201
@@ -549,10 +761,9 @@ class OrganizationsTestsB(BaseTest):
 
         self.lg('%s ENDED' % self._testID)
 
-    def test007_get_delete_orgs_invitation(self):
-
+    def test011_get_delete_organizations_invitation(self):
         """
-            #ITSYOU-046
+            #ITSYOU-050
             * Same steps for orgmember and orgowner roles
             - org-11 invite nonexisting organization to join org_11 as orgmember, should fail with 404
             - org-11 invite org-21 to join org_11 as orgmember, should succeed with 201
@@ -571,19 +782,19 @@ class OrganizationsTestsB(BaseTest):
         for role in ['orgmember', 'orgowner']:
 
             self.lg('org-11 invite nonexisting organization to join org_11 role %s , should fail with 404' % role)
-            data = {'searchstring': 'fake_organization'}
+            data = {role: 'fake_organization'}
             if role =="orgmember":
-                response = self.client_1.api.AddOrganizationOrgmember(data, globalid)
+                response = self.client_1.api.SetOrgMember(data, globalid)
             elif role == "orgowner":
-                response = self.client_1.api.AddOrganizationOrgowner(data, globalid)
+                response = self.client_1.api.SetOrgOwner(data, globalid)
             self.assertEqual(response.status_code, 404)
 
             self.lg('org-11 invite org-21 to join org_11 role %s , should succeed with 201' % role)
-            data = {'searchstring': self.org_21_globalid}
+            data = {role: self.org_21_globalid}
             if role =="orgmember":
-                response = self.client_1.api.AddOrganizationOrgmember(data, globalid)
+                response = self.client_1.api.SetOrgMember(data, globalid)
             elif role == "orgowner":
-                response = self.client_1.api.AddOrganizationOrgowner(data, globalid)
+                response = self.client_1.api.SetOrgOwner(data, globalid)
             self.assertEqual(response.status_code, 201)
 
             self.lg('Get org-11 pending invitations, should succeed with 200')
@@ -622,384 +833,10 @@ class OrganizationsTestsB(BaseTest):
 
         self.lg('%s ENDED' % self._testID)
 
-    def test008_get_post_put_delete_description(self):
-        """
-            #ITSYOU-047
-            - Add new description with langkey "en", should succeed with 201
-            - Get description by langkey, should succeed with 200
-            - Add new description with random langkey, should succeed with 201
-            - Update description, should succeed with 200
-            - Delete description, should succeed with 204
-            - Get description withfallback, should succeed with 200
-        """
-        self.lg('%s STARTED' % self._testID)
-
-        globalid = self.org_11_globalid
-
-        self.lg('Add new description with langkey "en", should succeed with 201')
-        text = self.random_value()
-        langkey = 'en'
-        data = {"langkey": langkey, "text": text}
-        response = self.client_1.api.AddOrganizationDescription(data, globalid)
-        self.assertEqual(response.status_code, 201)
-        self.assertEqual(response.json(), data)
-
-        self.lg('Get description by langkey, should succeed with 200')
-        response = self.client_1.api.GetOrganizationDescription(langkey, globalid)
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json()['langkey'], langkey)
-
-        self.lg('Add new description with random langkey, should succeed with 201')
-        text = self.random_value()
-        new_langkey = self.random_value(2)
-        new_data = {"langkey": new_langkey, "text": text}
-        response = self.client_1.api.AddOrganizationDescription(new_data, globalid)
-        self.assertEqual(response.status_code, 201)
-        self.assertEqual(response.json(), new_data)
-
-        self.lg('Update description, should succeed with 200')
-        text = self.random_value()
-        new_data = {"langkey": new_langkey, "text": text}
-        response = self.client_1.api.UpdateOrganizationDescription(new_data, globalid)
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json(), new_data)
-
-        self.lg('Delete description, should succeed with 204')
-        response = self.client_1.api.DeleteOrganizationDescription(new_langkey, globalid)
-        self.assertEqual(response.status_code, 204)
-
-        self.lg('Get description withfallback, should succeed with 200')
-        response = self.client_1.api.GetOrganizationDescriptionWithfallback(new_langkey, globalid)
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json()['langkey'], 'en')
-
-        self.lg('%s ENDED' % self._testID)
-
-    @unittest.skip('bug: #440 #452')
-    def test009_get_post_twofa(self):
-        """
-            #ITSYOU-048
-            - Update 2fa with owner user, should succeed with 200
-            - Update 2fa with invalid value, should fail with 400
-            - Update 2fa with member user, should fail with 403
-            - Get 2fa, should succeed with 200
-            - Get 2fa of nonexisting organization , should fail with 404
-            - Update 2fa of nonexisting organization, should fail with 404
-        """
-        self.lg('%s STARTED' % self._testID)
-
-        globalid = self.org_12_globalid
-
-        self.lg('[POST] Update 2fa with owner user, should succeed with 200')
-        secondsvalidity = 2000
-        data = {"secondsvalidity":secondsvalidity}
-        response = self.client_1.api.UpdateTwoFA(data, globalid)
-        self.assertEqual(response.status_code, 200)
-
-        self.lg('[POST] Update 2fa with invalid value, should fail with 400')
-        secondsvalidity = self.random_value()
-        data = {"secondsvalidity":secondsvalidity}
-        response = self.client_1.api.UpdateTwoFA(data, globalid)
-        self.assertEqual(response.status_code, 400)
-
-        self.lg('[POST] Update 2fa with member user, should fail with 403')
-        secondsvalidity = 2000
-        data = {"secondsvalidity":secondsvalidity}
-        response = self.client_2.api.UpdateTwoFA(data, globalid)
-        self.assertEqual(response.status_code, 403)
-
-        self.lg('[GET] Get 2fa, should succeed with 200')
-        response = response = self.client_1.api.GetTwoFA(globalid)
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json()['secondsvalidity'], secondsvalidity)
-
-        #bug #440 (internal server error)
-        self.lg('[GET] Get 2fa of nonexisting organization , should fail with 404')
-        response = self.client_1.api.GetTwoFA('fake_globalid')
-        self.assertEqual(response.status_code, 404)
-
-        ##bug #452 (403 instead of 404 put not post)
-        self.lg('[POST] Update 2fa of nonexisting organization, should fail with 404')
-        data = {"secondsvalidity":secondsvalidity}
-        response = self.client_2.api.UpdateTwoFA(data, 'fake_globalid')
-        self.assertEqual(response.status_code, 404)
-
-        self.lg('%s ENDED' % self._testID)
-
-    def test010_post_put_delete_add_orgmembers(self):
-
-        """
-            #ITSYOU-049
-            - Create organization org-11 and make user_1 an owner
-            - Create organization org-12 and make user_1 an owner & user_2 a member
-            - Create organization org-22 and make user_2 an owner & user_1 a member
-            - Add org-12 to org-11 orgmembers, should succeed with 201
-            - Add org-12 to org-11 orgmembers again, should fail with 409
-            - User_2 remove user_1 as owner of org-11, should fail with 403
-            - Add org-22 to org-11 orgmembers, should fail with 403
-            - Add nonexisting organization to org-11 orgmembers, should fail with 404
-            - Update org-12 from orgmember to orgowner of org-11, should succeed with 200
-            - Update org-12 from orgowner to orgmember of org-11, should succeed with 200
-            - Update org-22 organizations membership, should fail with 403
-            - Update nonexisting organizations membership, should fail with 404
-            - Remove org-12 as orgmember of org-11, should succeed with 204
-            - Remove nonexisting organization as orgmember of org-11, should fail with 404
-        """
-        self.lg('%s STARTED' % self._testID)
-
-        self.lg('[POST] Add org-12 to org-11 orgmembers, should succeed with 201')
-        data = {"orgmember":self.org_12_globalid}
-        response = self.client_1.api.SetOrgMember(data, self.org_11_globalid)
-        self.assertEqual(response.status_code, 201)
-
-        response = self.client_1.api.GetOrganization(self.org_11_globalid)
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(self.org_12_globalid, response.json()['orgmembers'])
-
-        self.lg('[POST] Add org-12 to org-11 orgmembers again, should fail with 409')
-        data = {"orgmember":self.org_12_globalid}
-        response = self.client_1.api.SetOrgMember(data, self.org_11_globalid)
-        self.assertEqual(response.status_code, 409)
-
-        self.lg('[DEL] User_2 remove user_1 as owner of org-11, should fail with 403')
-        response = self.client_2.api.RemoveOrganizationMember(self.user_1, self.org_11_globalid)
-        self.assertEqual(response.status_code, 403)
-
-        self.lg('[POST] Add org-22 org-11 orgmembers, should fail with 403')
-        data = {"orgmember":self.org_22_globalid}
-        response = self.client_1.api.SetOrgMember(data, self.org_11_globalid)
-        self.assertEqual(response.status_code, 403)
-
-        self.lg('[POST] Add nonexisting to org-11 orgmembers, should fail with 404')
-        data = {"orgmember":'fake_org'}
-        response = self.client_1.api.SetOrgMember(data, self.org_11_globalid)
-        self.assertEqual(response.status_code, 404)
-
-        self.lg('[PUT] Update org-12 from orgmember to orgowner of org-11, should succeed with 200')
-        data = {"org":self.org_12_globalid, "role":"owners"}
-        response = self.client_1.api.UpdateOrganizationOrgMemberShip(data, self.org_11_globalid)
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(self.org_12_globalid, response.json()['orgowners'])
-
-        self.lg('[PUT] Update org-12 from orgowner to orgmember of org-11, should succeed with 200')
-        data = {"org":self.org_12_globalid, "role":"members"}
-        response = self.client_1.api.UpdateOrganizationOrgMemberShip(data, self.org_11_globalid)
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(self.org_12_globalid, response.json()['orgmembers'])
-
-        self.lg('[PUT] Update org-22 organizations membership, should fail with 403')
-        data = {"org":self.org_22_globalid, "role":"members"}
-        response = self.client_1.api.UpdateOrganizationOrgMemberShip(data, self.org_11_globalid)
-        self.assertEqual(response.status_code, 403)
-
-        self.lg('[PUT] Update nonexisting organizations membership, should fail with 404')
-        data = {"org":"fake_org", "role":"members"}
-        response = self.client_1.api.UpdateOrganizationOrgMemberShip(data, self.org_11_globalid)
-        self.assertEqual(response.status_code, 404)
-
-        self.lg('[DEL] Remove org-12 as orgmember of org-11, should succeed with 204')
-        response = self.client_1.api.DeleteOrgMember(self.org_12_globalid, self.org_11_globalid)
-        self.assertEqual(response.status_code, 204)
-
-        response = self.client_1.api.GetOrganization(self.org_11_globalid)
-        self.assertEqual(response.status_code, 200)
-        self.assertNotIn(self.org_12_globalid, response.json()['orgmembers'])
-
-        self.lg('[DEL] Remove nonexisting organization as orgmember of org-11, should fail with 404')
-        response = self.client_1.api.DeleteOrgMember('fake_org', self.org_11_globalid)
-        self.assertEqual(response.status_code, 404)
-
-        self.lg('%s ENDED' % self._testID)
-
-    def test011_post_delete_add_orgowners(self):
-
-        """
-            #ITSYOU-050
-            - Create organization org-11 and make user_1 an owner
-            - Create organization org-12 and make user_1 an owner & user_2 a member
-            - Create organization org-22 and make user_2 an owner & user_1 a member
-            - Add org-12 to org-11 orgowners, should succeed with 201
-            - Add org-12 to org-11 orgowners again, should fail with 409
-            - Add org-22 org-11 orgmembers, should fail with 403
-            - Add nonexisting organization to org-11 orgowners, should fail with 404
-            - Remove org-12 as orgowners of org-11, should succeed with 204
-            - Remove nonexisting organization as orgowners of org-11, should fail with 404
-            - Add org-13 to org-11 orgowners, should succeed with 201
-            - User_2 get org-11 info , should fail with 403
-            - Include suborganization of org-13 to be orgowners of org-11, should succeed with 201
-            - User_2 get org-11 info , should succeed with 200
-            - Remove suborganization of org-13 from orgowners of org-11, should succeed with 204
-            - User_2 get org-11 info , should fail with 403
-            - Include suborganization of nonexisting organization to be orgowners of org-11, should fail with 404
-            - Remove suborganization of nonexisting organization from orgowners of org-11, should fail with 404
-        """
-        self.lg('%s STARTED' % self._testID)
-
-        self.lg('[POST] Add org-12 to org-11 orgowner, should succeed with 201')
-        data = {"orgowner":self.org_12_globalid}
-        response = self.client_1.api.SetOrgOwner(data, self.org_11_globalid)
-        self.assertEqual(response.status_code, 201)
-
-        response = self.client_1.api.GetOrganization(self.org_11_globalid)
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(self.org_12_globalid, response.json()['orgowners'])
-
-        self.lg('[POST] Add org-12 to org-11 orgowner again, should fail with 409')
-        data = {"orgowner":self.org_12_globalid}
-        response = self.client_1.api.SetOrgOwner(data, self.org_11_globalid)
-        self.assertEqual(response.status_code, 409)
-
-        self.lg('[POST] Add org-22 org-11 orgowner, should fail with 403')
-        data = {"orgowner":self.org_22_globalid}
-        response = self.client_1.api.SetOrgOwner(data, self.org_11_globalid)
-        self.assertEqual(response.status_code, 403)
-
-        self.lg('[POST] Add nonexisting to org-11 orgowner, should fail with 404')
-        data = {"orgowner":'fake_org'}
-        response = self.client_1.api.SetOrgOwner(data, self.org_11_globalid)
-        self.assertEqual(response.status_code, 404)
-
-        self.lg('[DEL] Remove org-12 as orgowner of org-11, should succeed with 204')
-        response = self.client_1.api.DeleteOrgOwner(self.org_12_globalid, self.org_11_globalid)
-        self.assertEqual(response.status_code, 204)
-
-        response = self.client_1.api.GetOrganization(self.org_11_globalid)
-        self.assertEqual(response.status_code, 200)
-        self.assertNotIn(self.org_12_globalid, response.json()['orgowners'])
-
-        self.lg('[DEL] Remove nonexisting organization as orgowner of org-11, should fail with 404')
-        response = self.client_1.api.DeleteOrgOwner('fake_org', self.org_11_globalid)
-        self.assertEqual(response.status_code, 404)
-
-        self.lg('[POST]  Add org-13 to org-11 orgowners, should succeed with 201')
-        data = {"orgowner":self.org_13_globalid}
-        response = self.client_1.api.SetOrgOwner(data, self.org_11_globalid)
-        self.assertEqual(response.status_code, 201)
-
-        self.lg('[GET] User_2 get org-11 info , should fail with 403')
-        response = self.client_2.api.GetOrganization(self.org_11_globalid)
-        self.assertEqual(response.status_code, 403)
-
-        self.lg('[POST] Include suborganization of org-13 to be orgowners of org-11, should succedd with 201')
-        data = {"globalid":self.org_13_globalid}
-        response = self.client_1.api.IncludeSuborgsof(data, self.org_11_globalid)
-        self.assertEqual(response.status_code, 201)
-
-        self.lg('[GET] User_2 get org-11 info , should succeed with 200')
-        response = self.client_2.api.GetOrganization(self.org_11_globalid)
-        self.assertEqual(response.status_code, 200)
-
-        self.lg('[DEL] Remove suborganization of org-13 from orgowners of org-11, should succedd with 204')
-        response = self.client_1.api.RemoveIncludeSuborgsof(self.org_11_globalid, self.org_13_globalid)
-        self.assertEqual(response.status_code, 204)
-
-        self.lg('[GET] User_2 get org-11 info , should fail with 403')
-        response = self.client_2.api.GetOrganization(self.org_11_globalid)
-        self.assertEqual(response.status_code, 403)
-
-        self.lg('[POST] Include suborganization of nonexisting organization to be orgowners of org-11, should fail with 404')
-        data = {"globalid":'fake_organization'}
-        response = self.client_1.api.IncludeSuborgsof(data, self.org_11_globalid)
-        self.assertEqual(response.status_code, 404)
-
-        self.lg('[DEL] Remove suborganization of nonexisting organization from orgowners of org-11, should fail with 404')
-        response = self.client_1.api.RemoveIncludeSuborgsof(self.org_11_globalid, 'fake_organization')
-        self.assertEqual(response.status_code, 404)
-
-        self.lg('%s ENDED' % self._testID)
-
-    @unittest.skip('bug: #461')
-    def test012_post_put_delete_invite_orgmembers(self):
-
+    @unittest.skip('bug: #454')
+    def test012_post_put_delete_members(self):
         """
             #ITSYOU-051
-            - Create organization org-11 and make user_1 an owner
-            - Create organization org-21 and make user_2 an owner
-            - User_1 invite org-21 to join org-11 as orgmember
-            - User_2 accept User_1 invitation
-            - User_2 remove user_1 as owner of org-11, should fail with 403
-            - User_1 Remove org-21 as orgmember of org-11, should succeed with 204
-            - User_1 invite org-21 to join org-11 as orgmember again
-            - User_2 accept User_1 invitation
-            - Update org-21 from orgmember to orgowner of org-11, should succeed with 201
-        """
-        self.lg('%s STARTED' % self._testID)
-
-        globalid = self.org_11_globalid
-
-        self.lg('[POST] User_1 invite org-21 to join org-11 as orgmember')
-        data = {'searchstring': self.org_21_globalid}
-        response = self.client_1.api.AddOrganizationOrgmember(data, globalid)
-        self.assertEqual(response.status_code, 201)
-
-        self.lg('[POST] User_2 accept User_1 invitation')
-        response = self.client_2.api.AcceptOrgMembership(self.org_21_globalid, 'orgmember', self.org_11_globalid)
-        self.assertEqual(response.status_code, 201)
-
-        self.lg('[DEL] User_2 remove user_1 as owner of org-11, should fail with 403')
-        response = self.client_2.api.RemoveOrganizationMember(self.user_1, self.org_11_globalid)
-        self.assertEqual(response.status_code, 403)
-
-        self.lg('[DEL] User_1 Remove org-21 as orgmember of org-11, should succeed with 204')
-        response = self.client_1.api.DeleteOrgMember(self.org_21_globalid, self.org_11_globalid)
-        self.assertEqual(response.status_code, 204)
-
-        self.lg('[POST] User_1 invite org-21 to join org-11 as orgmember again')
-        data = {'searchstring': self.org_21_globalid}
-        response = self.client_1.api.AddOrganizationOrgmember(data, globalid)
-        self.assertEqual(response.status_code, 201)
-
-        self.lg('[POST] User_2 accept User_1 invitation')
-        response = self.client_2.api.AcceptOrgMembership(self.org_21_globalid, 'orgmember', self.org_11_globalid)
-        self.assertEqual(response.status_code, 201)
-
-        self.lg('[PUT] Update org-21 from orgmember to orgowner of org-11, should succeed with 201')
-        data = {"org":self.org_21_globalid, "role":"owners"}
-        response = self.client_1.api.UpdateOrganizationOrgMemberShip(data, self.org_11_globalid)
-        self.assertEqual(response.status_code, 201)
-
-        self.lg('%s ENDED' % self._testID)
-
-    def test013_post_put_delete_invite_orgowners(self):
-
-        """
-            #ITSYOU-052
-            - Create organization org-11 and make user_1 an owner
-            - Create organization org-21 and make user_2 an owner
-            - User_1 invite org-21 to join org-11 as orgowner
-            - User_2 accept User_1 invitation
-            - Update org-21 from orgowner to orgmember of org-11, should fail with 403
-            - Remove org-21 as orgowner of org-11, should fail with 403
-        """
-        self.lg('%s STARTED' % self._testID)
-
-        globalid = self.org_11_globalid
-
-        self.lg('[POST] User_1 invite org-21 to join org-11 as orgowner')
-        data = {'searchstring': self.org_21_globalid}
-        response = self.client_1.api.AddOrganizationOrgowner(data, globalid)
-        self.assertEqual(response.status_code, 201)
-
-        self.lg('[POST] User_2 accept User_1 invitation')
-        response = self.client_2.api.AcceptOrgMembership(self.org_21_globalid, 'orgowner', self.org_11_globalid)
-        self.assertEqual(response.status_code, 201)
-
-        self.lg('[PUT] Update org-21 from orgowner to orgmember of org-11, should fail with 403')
-        data = {"org":self.org_21_globalid, "role":"members"}
-        response = self.client_1.api.UpdateOrganizationOrgMemberShip(data, self.org_11_globalid)
-        self.assertEqual(response.status_code, 403)
-
-        self.lg('[DEL] Remove org-21 as orgowner of org-11, should fail with 403')
-        response = self.client_1.api.DeleteOrgOwner(self.org_21_globalid, self.org_11_globalid)
-        self.assertEqual(response.status_code, 403)
-
-        self.lg('%s ENDED' % self._testID)
-
-    @unittest.skip('bug: #454')
-    def test014_post_put_delete_members(self):
-
-        """
-            #ITSYOU-053
             - Create org-11 organization and make user_1 an owner
             - User_1 invite user_2 to be a member of org-11, should succeed with 201
             - User_2 accept the invitations, should succeed with 201
@@ -1069,10 +906,9 @@ class OrganizationsTestsB(BaseTest):
 
         self.lg('%s ENDED' % self._testID)
 
-    def test015_post_put_delete_owners(self):
-
+    def test013_post_delete_owners(self):
         """
-            #ITSYOU-054
+            #ITSYOU-052
             - Create organization org-11 and make user_1 an owner
             - User_1 invite user_2 to be an owner of org-11, should succeed with 201
             - User_2 accept the invitations, should succeed with 201
@@ -1110,114 +946,295 @@ class OrganizationsTestsB(BaseTest):
 
         self.lg('%s ENDED' % self._testID)
 
-    @unittest.skip('bug: #439')
-    def test016_get_put_delete_logo(self):
+    @unittest.skip('bug: #461')
+    def test014_post_put_delete_orgmembers(self):
         """
-            #ITSYOU-055
-            - Get organization logo, should succeed with 200
-            - Update organization logo, should succeed with 200
-            - Update organization logo with large file, should fail with 413
-            - Remove organization logo, should succeed with 204
-            - Remove nonexisting organization logo, should fail with 404
+            #ITSYOU-053
+            - Create organization org-11 and make user_1 an owner
+            - Create organization org-12 and make user_1 an owner & user_2 a member
+            - Create organization org-21 and make user_2 an owner
+            - Create organization org-13 and make user_1
+            - Create suborganization inside org-13 and make user_2 an owner
+            - Add org-12 to org-11 orgmembers, should succeed with 201
+            - Add org-12 to org-11 orgmembers again, should fail with 409
+            - User_2 remove user_1 as owner of org-11, should fail with 403
+            - invite org-21 to be orgmember in org-11, should succeed with 201
+            - check org-11 pending invitations, should succeed with 200
+            - User_2 accept User_1 invitation
+            - Add nonexisting organization to org-11 orgmembers, should fail with 404
+            - Update org-12 from orgmember to orgowner of org-11, should succeed with 200
+            - Update org-12 from orgowner to orgmember of org-11, should succeed with 200
+            - Update org-21 organizations membership from orgmember to orgowner, should succeed with 200    ## BUG: 461
+            - Update org-21 organizations membership from orgowner to orgmember, should fail with 200       ## BUG: 461
+            - Update nonexisting organizations membership, should fail with 404
+            - Remove org-12 as orgmember of org-11, should succeed with 204
+            - Remove org-21 as orgmember of org-11, should succeed with 204
+            - Remove nonexisting organization as orgmember of org-11, should fail with 404
+            - Add org-13 to org-11 orgmembers, should succeed with 201
+            - User_2 get org-11 info , should fail with 403
+            - Include suborganizations of org-13 to be orgmembers of org-11, should succeed with 201
+            - User_2 get org-11 info , should succeed with 200
+            - Remove suborganizations of org-13 from orgmembers of org-11, should succeed with 204
+            - User_2 get org-11 info , should fail with 403
+            - Include suborganization of nonexisting organization to be orgmembers of org-11, should fail with 404
+            - Remove suborganizations of nonexisting organization from orgmembers of org-11, should fail with 404
         """
         self.lg('%s STARTED' % self._testID)
 
-        globalid = self.org_11_globalid
+        self.lg('[POST] Add org-12 to org-11 orgmembers, should succeed with 201')
+        data = {"orgmember":self.org_12_globalid}
+        response = self.client_1.api.SetOrgMember(data, self.org_11_globalid)
+        self.assertEqual(response.status_code, 201)
 
-        self.lg('[GET] Get organization logo, should succeed with 200')
-        response = self.client_1.api.GetOrganizationLogo(globalid)
+        response = self.client_1.api.GetOrganization(self.org_11_globalid)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json()['logo'], "")
+        self.assertIn(self.org_12_globalid, response.json()['orgmembers'])
 
-        self.lg('[PUT] Update organization logo, should succeed with 200')
-        logo = 'data:image/png;base64,' + self.random_value(1024)
-        data = {"logo":logo}
-        response = self.client_1.api.SetOrganizationLogo(data, globalid)
+        self.lg('[POST] Add org-12 to org-11 orgmembers again, should fail with 409')
+        data = {"orgmember":self.org_12_globalid}
+        response = self.client_1.api.SetOrgMember(data, self.org_11_globalid)
+        self.assertEqual(response.status_code, 409)
+
+        self.lg('[DEL] User_2 remove user_1 as owner of org-11, should fail with 403')
+        response = self.client_2.api.RemoveOrganizationMember(self.user_1, self.org_11_globalid)
+        self.assertEqual(response.status_code, 403)
+
+        self.lg('[POST] invite org-21 to be orgmember in  org-11 , should succeed with 201')
+        data = {"orgmember":self.org_21_globalid}
+        response = self.client_1.api.SetOrgMember(data, self.org_11_globalid)
+        self.assertEqual(response.status_code, 201)
+
+        self.lg('Get org-11 pending invitations, should succeed with 200')
+        response = self.client_1.api.GetPendingOrganizationInvitations(self.org_11_globalid)
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()[-1]['status'], 'pending')
+        self.assertEqual(response.json()[-1]['organization'], self.org_11_globalid)
+        self.assertEqual(response.json()[-1]['user'], self.org_21_globalid)
+        self.assertEqual(response.json()[-1]['role'], 'orgmember')
+        self.assertTrue(response.json()[-1]['isorganization'])
 
-        response = self.client_1.api.GetOrganizationLogo(globalid)
+        self.lg('Check user_2 invitations, should succeed with 200')
+        response = self.client_2.api.GetNotifications(self.user_2)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json()['logo'], logo)
+        self.assertEqual(self.org_11_globalid, response.json()['organizationinvitations'][-1]['organization'])
+        self.assertEqual('orgmember', response.json()['organizationinvitations'][-1]['role'])
+        self.assertEqual('pending', response.json()['organizationinvitations'][-1]['status'])
 
-        self.lg('[PUT] Update organization logo with large file, should fail with 413')
-        large_logo = 'data:image/png;base64,' + self.random_value(1024*1024*6)
-        data = {"logo":large_logo}
-        response = self.client_1.api.SetOrganizationLogo(data, globalid)
-        self.assertEqual(response.status_code, 413)
+        self.lg('[POST] User_2 accept User_1 invitation')
+        response = self.client_2.api.AcceptOrgMembership(self.org_21_globalid, 'orgmember', self.org_11_globalid)
+        self.assertEqual(response.status_code, 201)
 
-        self.lg('[DEL] Remove organization logo, should succeed with 204')
-        response = self.client_1.api.DeleteOrganizationLogo(globalid)
+        self.lg('[POST] Add nonexisting to org-11 orgmembers, should fail with 404')
+        data = {"orgmember":'fake_org'}
+        response = self.client_1.api.SetOrgMember(data, self.org_11_globalid)
+        self.assertEqual(response.status_code, 404)
+
+        self.lg('[PUT] Update org-12 from orgmember to orgowner of org-11, should succeed with 200')
+        data = {"org":self.org_12_globalid, "role":"owners"}
+        response = self.client_1.api.UpdateOrganizationOrgMemberShip(data, self.org_11_globalid)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(self.org_12_globalid, response.json()['orgowners'])
+
+        self.lg('[PUT] Update org-12 from orgowner to orgmember of org-11, should succeed with 200')
+        data = {"org":self.org_12_globalid, "role":"members"}
+        response = self.client_1.api.UpdateOrganizationOrgMemberShip(data, self.org_11_globalid)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(self.org_12_globalid, response.json()['orgmembers'])
+
+        # self.lg('[PUT] Update org-21 organizations membership from orgmember to orgowner, should succeed with 200')
+        # data = {"org":self.org_21_globalid, "role":"members"}
+        # response = self.client_1.api.UpdateOrganizationOrgMemberShip(data, self.org_11_globalid)
+        # self.assertEqual(response.status_code, 200)
+        #
+        # self.lg('[PUT] Update org-21 organizations membership from orgowner to orgmember, should fail with 200')
+        # data = {"org":self.org_21_globalid, "role":"members"}
+        # response = self.client_1.api.UpdateOrganizationOrgMemberShip(data, self.org_11_globalid)
+        # self.assertEqual(response.status_code, 200)
+
+        self.lg('[PUT] Update nonexisting organizations membership, should fail with 404')
+        data = {"org":"fake_org", "role":"members"}
+        response = self.client_1.api.UpdateOrganizationOrgMemberShip(data, self.org_11_globalid)
+        self.assertEqual(response.status_code, 404)
+
+        self.lg('[DEL] Remove org-12 as orgmember of org-11, should succeed with 204')
+        response = self.client_1.api.DeleteOrgMember(self.org_12_globalid, self.org_11_globalid)
         self.assertEqual(response.status_code, 204)
 
-        #bug #439 (403 instead of 404)
-        self.lg('[DEL] Remove nonexisting organization logo, should fail with 404')
-        response = self.client_1.api.DeleteOrganizationLogo('fake_globalid')
+        response = self.client_1.api.GetOrganization(self.org_11_globalid)
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn(self.org_12_globalid, response.json()['orgmembers'])
+
+        self.lg('[DEL] Remove org-21 as orgmember of org-11, should succeed with 204')
+        response = self.client_1.api.DeleteOrgMember(self.org_21_globalid, self.org_11_globalid)
+        self.assertEqual(response.status_code, 204)
+
+        response = self.client_1.api.GetOrganization(self.org_11_globalid)
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn(self.org_21_globalid, response.json()['orgmembers'])
+
+        self.lg('[DEL] Remove nonexisting organization as orgmember of org-11, should fail with 404')
+        response = self.client_1.api.DeleteOrgMember('fake_org', self.org_11_globalid)
+        self.assertEqual(response.status_code, 404)
+
+        self.lg('[POST]  Add org-13 to org-11 orgmembers, should succeed with 201')
+        data = {"orgmember":self.org_13_globalid}
+        response = self.client_1.api.SetOrgMember(data, self.org_11_globalid)
+        self.assertEqual(response.status_code, 201)
+
+        self.lg('[GET] User_2 get org-11 info , should fail with 403')
+        response = self.client_2.api.GetOrganization(self.org_11_globalid)
+        self.assertEqual(response.status_code, 403)
+
+        self.lg('[POST] Include suborganizations of org-13 to be orgmembers of org-11, should succedd with 201')
+        data = {"globalid":self.org_13_globalid}
+        response = self.client_1.api.IncludeSuborgsof(data, self.org_11_globalid)
+        self.assertEqual(response.status_code, 201)
+
+        self.lg('[GET] User_2 get org-11 info , should succeed with 200')
+        response = self.client_2.api.GetOrganization(self.org_11_globalid)
+        self.assertEqual(response.status_code, 200)
+
+        self.lg('[DEL] Remove suborganizations of org-13 from orgmembers of org-11, should succedd with 204')
+        response = self.client_1.api.RemoveIncludeSuborgsof(self.org_11_globalid, self.org_13_globalid)
+        self.assertEqual(response.status_code, 204)
+
+        self.lg('[GET] User_2 get org-11 info , should fail with 403')
+        response = self.client_2.api.GetOrganization(self.org_11_globalid)
+        self.assertEqual(response.status_code, 403)
+
+        self.lg('[POST] Include suborganizations of nonexisting organization to be orgmembers of org-11, should fail with 404')
+        data = {"globalid":'fake_organization'}
+        response = self.client_1.api.IncludeSuborgsof(data, self.org_11_globalid)
+        self.assertEqual(response.status_code, 404)
+
+        self.lg('[DEL] Remove suborganizations of nonexisting organization from orgmembers of org-11, should fail with 404')
+        response = self.client_1.api.RemoveIncludeSuborgsof(self.org_11_globalid, 'fake_organization')
         self.assertEqual(response.status_code, 404)
 
         self.lg('%s ENDED' % self._testID)
 
-    @unittest.skip('bug: #445')
-    def test017_get_post_contracts(self):
-
+    def test015_post_delete_orgowners(self):
         """
-            #ITSYOU-056
-            - Create a new contract (1), should succeed with 201
-            - Create a new contract (2), should succeed with 201
-            - Create a new expired contract (3), should succeed with 201
-            - Get organization\'s contracts, should succeed with 200
-            - Get organization\'s contracts & include the expired contracts, should succeed with 200
-            - Get organization\'s contracts with page size 1, should succeed with 200
-            - Get organization\'s contracts with start page 2, should succeed with 200
+            #ITSYOU-054
+            - Create organization org-11 and make user_1 an owner
+            - Create organization org-12 and make user_1 an owner & user_2 a member
+            - Create organization org-21 and make user_2 an owner & user_1 a member
+            - Create organization org-21 and make user_2 an owner & user_1 a member
+            - Create organization org-13 and make user_1
+            - Create suborganization inside org-13 and make user_2 an owner
+            - Add org-12 to org-11 orgowners, should succeed with 201
+            - Add org-12 to org-11 orgowners again, should fail with 409
+            - invite org-21 to be org-11 orgmembers, should succeed with 201
+            - Add nonexisting organization to org-11 orgowners, should fail with 404
+            - Remove org-12 as orgowners of org-11, should succeed with 204
+            - Remove org-21 as orgowners of org-11, should succeed with 204
+            - Remove nonexisting organization as orgowners of org-11, should fail with 404
+            - Add org-13 to org-11 orgowners, should succeed with 201
+            - User_2 get org-11 info , should fail with 403
+            - Include suborganization of org-13 to be orgowners of org-11, should succeed with 201
+            - User_2 get org-11 info , should succeed with 200
+            - Remove suborganization of org-13 from orgowners of org-11, should succeed with 204
+            - User_2 get org-11 info , should fail with 403
+            - Include suborganization of nonexisting organization to be orgowners of org-11, should fail with 404
+            - Remove suborganization of nonexisting organization from orgowners of org-11, should fail with 404
         """
         self.lg('%s STARTED' % self._testID)
 
-        globalid = self.org_11_globalid
-
-        self.lg('Create a new contract (1), should succeed with 201')
-        contractid_1 = self.random_value()
-        expire = '2030-10-02T22:00:00Z'
-        data = {'content':'contract_1', 'contractId':contractid_1, 'contractType':'partnership','expires':expire}
-        response = self.client_1.api.CreateOrganizationContracts(data, globalid)
+        self.lg('[POST] Add org-12 to org-11 orgowner, should succeed with 201')
+        data = {"orgowner":self.org_12_globalid}
+        response = self.client_1.api.SetOrgOwner(data, self.org_11_globalid)
         self.assertEqual(response.status_code, 201)
 
-        self.lg('Create a new contract (2), should succeed with 201')
-        contractid_2 = self.random_value()
-        expire = '2030-10-02T22:00:00Z'
-        data = {'content':'contract_2', 'contractId':contractid_2, 'contractType':'partnership','expires':expire}
-        response = self.client_1.api.CreateOrganizationContracts(data, globalid)
+        response = self.client_1.api.GetOrganization(self.org_11_globalid)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(self.org_12_globalid, response.json()['orgowners'])
+
+        self.lg('[POST] Add org-12 to org-11 orgowner again, should fail with 409')
+        data = {"orgowner":self.org_12_globalid}
+        response = self.client_1.api.SetOrgOwner(data, self.org_11_globalid)
+        self.assertEqual(response.status_code, 409)
+
+        self.lg('[POST] Add org-21 org-11 orgmembers, should succeed with 201')
+        data = {"orgowner":self.org_21_globalid}
+        response = self.client_1.api.SetOrgOwner(data, self.org_11_globalid)
         self.assertEqual(response.status_code, 201)
 
-        self.lg('Create a new expired contract (3), should succeed with 201')
-        contractid_3 = self.random_value()
-        expire = '2010-10-02T22:00:00Z'
-        data = {'content':'contract_3', 'contractId':contractid_3, 'contractType':'partnership','expires':expire}
-        response = self.client_1.api.CreateOrganizationContracts(data, globalid)
+        self.lg('Get org-11 pending invitations, should succeed with 200')
+        response = self.client_1.api.GetPendingOrganizationInvitations(self.org_11_globalid)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()[-1]['status'], 'pending')
+        self.assertEqual(response.json()[-1]['organization'], self.org_11_globalid)
+        self.assertEqual(response.json()[-1]['user'], self.org_21_globalid)
+        self.assertEqual(response.json()[-1]['role'], 'orgowner')
+        self.assertTrue(response.json()[-1]['isorganization'])
+
+        self.lg('Check user_2 invitations, should succeed with 200')
+        response = self.client_2.api.GetNotifications(self.user_2)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(self.org_11_globalid, response.json()['organizationinvitations'][-1]['organization'])
+        self.assertEqual('orgowner', response.json()['organizationinvitations'][-1]['role'])
+        self.assertEqual('pending', response.json()['organizationinvitations'][-1]['status'])
+
+        self.lg('[POST] User_2 accept User_1 invitation')
+        response = self.client_2.api.AcceptOrgMembership(self.org_21_globalid, 'orgowner', self.org_11_globalid)
         self.assertEqual(response.status_code, 201)
 
-        self.lg('[GET] Get organization\'s contracts, should succeed with 200')
-        response = self.client_1.api.GetOrganizationContracts(globalid)
-        self.assertEqual(response.status_code, 200)
-        self.assertNotEqual(contractid_3, response.json()[-1]['contractId'])
-        self.assertEqual(contractid_1, response.json()[-2]['contractId'])
-        self.assertEqual(contractid_2, response.json()[-1]['contractId'])
+        self.lg('[POST] Add nonexisting organization to org-11 orgowner, should fail with 404')
+        data = {"orgowner":'fake_org'}
+        response = self.client_1.api.SetOrgOwner(data, self.org_11_globalid)
+        self.assertEqual(response.status_code, 404)
 
-        response = self.client_1.api.GetOrganizationContracts(globalid, query_params={"max":1000,"includeExpired":True})
+        self.lg('[DEL] Remove org-12 as orgowner of org-11, should succeed with 204')
+        response = self.client_1.api.DeleteOrgOwner(self.org_12_globalid, self.org_11_globalid)
+        self.assertEqual(response.status_code, 204)
+        response = self.client_1.api.GetOrganization(self.org_11_globalid)
         self.assertEqual(response.status_code, 200)
-        number_of_contracts = len(response.json())-1
+        self.assertNotIn(self.org_12_globalid, response.json()['orgowners'])
 
-        self.lg('[GET] Get organization\'s contracts & include the expired contracts, should succeed with 200')
-        response = self.client_1.api.GetOrganizationContracts(globalid, query_params={"max":1000,"includeExpired":True})
+        self.lg('[DEL] Remove org-21 as orgowner of org-11, should succeed with 204')
+        response = self.client_1.api.DeleteOrgOwner(self.org_21_globalid, self.org_11_globalid)
+        self.assertEqual(response.status_code, 204)
+        response = self.client_1.api.GetOrganization(self.org_11_globalid)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(contractid_3, response.json()[-1]['contractId'])
+        self.assertNotIn(self.org_21_globalid, response.json()['orgowners'])
 
-        self.lg('[GET] Get organization\'s contracts with page size 1, should succeed with 200')
-        response = self.client_1.api.GetOrganizationContracts(globalid, query_params={"max":1, "start":number_of_contracts})
-        self.assertEqual(contractid_2, response.json()[0]['contractId'])
+        self.lg('[DEL] Remove nonexisting organization as orgowner of org-11, should fail with 404')
+        response = self.client_1.api.DeleteOrgOwner('fake_org', self.org_11_globalid)
+        self.assertEqual(response.status_code, 404)
+
+        self.lg('[POST]  Add org-13 to org-11 orgowners, should succeed with 201')
+        data = {"orgowner":self.org_13_globalid}
+        response = self.client_1.api.SetOrgOwner(data, self.org_11_globalid)
+        self.assertEqual(response.status_code, 201)
+
+        self.lg('[GET] User_2 get org-11 info , should fail with 403')
+        response = self.client_2.api.GetOrganization(self.org_11_globalid)
+        self.assertEqual(response.status_code, 403)
+
+        self.lg('[POST] Include suborganization of org-13 to be orgowners of org-11, should succedd with 201')
+        data = {"globalid":self.org_13_globalid}
+        response = self.client_1.api.IncludeSuborgsof(data, self.org_11_globalid)
+        self.assertEqual(response.status_code, 201)
+
+        self.lg('[GET] User_2 get org-11 info , should succeed with 200')
+        response = self.client_2.api.GetOrganization(self.org_11_globalid)
         self.assertEqual(response.status_code, 200)
 
-        self.lg('[GET] Get organization\'s contracts with page size 2, should succeed with 200')
-        response = self.client_1.api.GetOrganizationContracts(globalid, query_params={"max":1, "start":number_of_contracts-1})
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(contractid_1, response.json()[0]['contractId'])
+        self.lg('[DEL] Remove suborganization of org-13 from orgowners of org-11, should succedd with 204')
+        response = self.client_1.api.RemoveIncludeSuborgsof(self.org_11_globalid, self.org_13_globalid)
+        self.assertEqual(response.status_code, 204)
+
+        self.lg('[GET] User_2 get org-11 info , should fail with 403')
+        response = self.client_2.api.GetOrganization(self.org_11_globalid)
+        self.assertEqual(response.status_code, 403)
+
+        self.lg('[POST] Include suborganization of nonexisting organization to be orgowners of org-11, should fail with 404')
+        data = {"globalid":'fake_organization'}
+        response = self.client_1.api.IncludeSuborgsof(data, self.org_11_globalid)
+        self.assertEqual(response.status_code, 404)
+
+        self.lg('[DEL] Remove suborganization of nonexisting organization from orgowners of org-11, should fail with 404')
+        response = self.client_1.api.RemoveIncludeSuborgsof(self.org_11_globalid, 'fake_organization')
+        self.assertEqual(response.status_code, 404)
 
         self.lg('%s ENDED' % self._testID)
