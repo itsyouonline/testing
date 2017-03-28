@@ -132,17 +132,18 @@ class OrganizationsTestsB(BaseTest):
 
         self.lg('%s ENDED' % self._testID)
 
-    @unittest.skip('bug: #447 #448 #450')
+    @unittest.skip('bug: #448 #450')
     def test002_get_post_put_delete_organization(self):
         """
             #ITSYOU-041
-            - Create suborganization (1), should succeed with 201
-            - Get organization tree, should succeed with 200
+            - Create suborganization (1) inside org-11, should succeed with 201
+            - Get organization org-11 tree, should succeed with 200
             - Create suborganization with globalid already exists (globalid of suborganization(1)), should succeed with 409
-            - Update organization globalid, should fail with 403
-            - Update organization info, should succeed with 201
+            - Update organization org-11 globalid, should fail with 403
+            - Update organization org-11 info, should succeed with 201
             - Delete suborganization (1), should succeed with 204
             - Delete nonexisting organization, should fail with 404
+            - Delete org-11, should succeed with 204
         """
 
         self.lg('%s STARTED' % self._testID)
@@ -184,6 +185,10 @@ class OrganizationsTestsB(BaseTest):
         self.lg('[DEL] Delete nonexisting organization, should fail with 404')
         response = self.client_1.api.DeleteOrganization('fake_organization')
         self.assertEqual(response.status_code, 404)
+
+        self.lg('[DEL] Delete organization org-11, should succeed with 204')
+        response = self.client_1.api.DeleteOrganization(self.org_11_globalid)
+        self.assertEqual(response.status_code, 204)
 
         self.lg('%s ENDED' % self._testID)
 
