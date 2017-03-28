@@ -585,18 +585,18 @@ class Client:
     def AddOrganizationOrgmember(self, data, globalid, query_params=None):
         """
         Assign a member to organization.
-        It is method for POST /organizations/{globalid}/orgmembers/invite
+        It is method for POST /organizations/{globalid}/orgmembers
         """
-        uri = self.url + "organizations/"+globalid+"/orgmembers/invite"
+        uri = self.url + "organizations/"+globalid+"/orgmembers"
         uri = uri + build_query_string(query_params)
         return self.session.post(uri, json=data)
 
     def AddOrganizationOrgowner(self, data, globalid, query_params=None):
         """
         Assign a member to organization.
-        It is method for POST /organizations/{globalid}/orgowners/invite
+        It is method for POST /organizations/{globalid}/orgowners
         """
-        uri = self.url + "organizations/"+globalid+"/orgowners/invite"
+        uri = self.url + "organizations/"+globalid+"/orgowners"
         uri = uri + build_query_string(query_params)
         return self.session.post(uri, json=data)
 

@@ -52,7 +52,6 @@ class UsersTestsB(BaseTest):
 
         super(UsersTestsB, self).tearDown()
 
-    @unittest.skip('bug: #412')
     def test001_get_user_info(self):
 
         """
